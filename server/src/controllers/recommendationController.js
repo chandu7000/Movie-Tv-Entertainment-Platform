@@ -1,0 +1,1 @@
+const {successResponse}=require('../utils/apiResponse'); const {getRecommendations}=require('../services/recommendationService'); const list=async(req,res,next)=>{try{return successResponse(res,{data:await getRecommendations(req.user._id)});}catch(error){return next(error);}}; module.exports={list};

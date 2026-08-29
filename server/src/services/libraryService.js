@@ -1,0 +1,7 @@
+const LibraryItem = require('../models/LibraryItem');
+const normalizeItem = (payload = {}) => ({ tmdbId: Number(payload.tmdbId), mediaType: payload.mediaType, title: String(payload.title || '').trim(), posterPath: payload.posterPath || '', backdropPath: payload.backdropPath || '', releaseDate: payload.releaseDate || '', rating: Number(payload.rating || 0), genreIds: Array.isArray(payload.genreIds) ? payload.genreIds.map(Number).filter(Number.isFinite) : [] });
+const listItems = (userId, kind, query = {}) => { const filter = { user: userId, kind }; if (['movie','tv'].includes(query.mediaType)) filter.mediaType = query.mediaType; const sort = query.sort === 'oldest' ? { createdAt: 1 } : query.sort === 'rating' ? { rating: -1, createdAt: -1 } : { createdAt: -1 }; return LibraryItem.find(filter).sort(sort).lean(); };
+const addItem = async (userId, kind, payload) => { const normalized = normalizeItem(payload); return LibraryItem.findOneAndUpdate({ user: userId, kind, tmdbId: normalized.tmdbId, mediaType: normalized.mediaType }, { $setOnInsert: { user: userId, kind }, $set: normalized }, { new: true, upsert: true, runValidators: true }).lean(); };
+const removeItem = (userId, kind, mediaType, tmdbId) => LibraryItem.findOneAndDelete({ user: userId, kind, mediaType, tmdbId: Number(tmdbId) }).lean();
+const hasItem = (userId, kind, mediaType, tmdbId) => LibraryItem.exists({ user: userId, kind, mediaType, tmdbId: Number(tmdbId) });
+module.exports = { listItems, addItem, removeItem, hasItem, normalizeItem };

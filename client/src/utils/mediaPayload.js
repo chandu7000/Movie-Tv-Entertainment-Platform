@@ -1,0 +1,1 @@
+export const toMediaPayload=(data,mediaType)=>({tmdbId:Number(data?.id),mediaType,title:data?.title||data?.name||'Untitled',posterPath:data?.poster_path||'',backdropPath:data?.backdrop_path||'',releaseDate:data?.release_date||data?.first_air_date||'',rating:Number(data?.vote_average||0),genreIds:(data?.genres||[]).map(genre=>Number(genre.id)).filter(Number.isFinite)});

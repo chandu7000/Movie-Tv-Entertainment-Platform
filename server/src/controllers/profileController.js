@@ -1,0 +1,1 @@
+const {successResponse}=require('../utils/apiResponse'); const {getProfileStats}=require('../services/profileService'); const stats=async(req,res,next)=>{try{return successResponse(res,{data:{stats:await getProfileStats(req.user._id)}});}catch(error){return next(error);}}; module.exports={stats};

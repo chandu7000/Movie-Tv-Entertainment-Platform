@@ -1,0 +1,1 @@
+const express=require('express'); const {requireAuth}=require('../middleware/auth'); const {list}=require('../controllers/recommendationController'); const router=express.Router(); router.get('/',requireAuth,list); module.exports=router;

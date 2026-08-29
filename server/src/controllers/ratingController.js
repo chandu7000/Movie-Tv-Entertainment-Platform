@@ -1,0 +1,7 @@
+const Rating = require('../models/Rating');
+const { successResponse } = require('../utils/apiResponse');
+const { validateRating } = require('../utils/validation');
+const upsertRating = async (req,res,next) => { try { const errors=validateRating(req.body); if(Object.keys(errors).length) return res.status(400).json({success:false,message:'Validation failed.',data:{errors}}); const p=req.body; const rating=await Rating.findOneAndUpdate({user:req.user._id,tmdbId:Number(p.tmdbId),mediaType:p.mediaType},{ $set:{value:Number(p.value),title:p.title.trim(),posterPath:p.posterPath||'',genreIds:Array.isArray(p.genreIds)?p.genreIds.map(Number):[]}},{new:true,upsert:true,runValidators:true}).lean(); return successResponse(res,{message:'Rating saved.',data:{rating}}); } catch(error){return next(error);} };
+const getMyRating = async (req,res,next) => { try { const rating=await Rating.findOne({user:req.user._id,mediaType:req.params.mediaType,tmdbId:Number(req.params.tmdbId)}).lean(); return successResponse(res,{data:{rating}}); } catch(error){return next(error);} };
+const removeRating = async (req,res,next) => { try { const rating=await Rating.findOneAndDelete({user:req.user._id,mediaType:req.params.mediaType,tmdbId:Number(req.params.tmdbId)}).lean(); if(!rating) return res.status(404).json({success:false,message:'Rating not found.',data:null}); return successResponse(res,{message:'Rating removed.'}); } catch(error){return next(error);} };
+module.exports={upsertRating,getMyRating,removeRating};
