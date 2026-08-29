@@ -75,10 +75,7 @@ test('renders the CineVerse shell, navigation and home content', async () => {
 
   render(
     <Provider store={store}>
-      <RouterProvider
-        router={router}
-        future={{ v7_startTransition: true }}
-      />
+      <RouterProvider router={router} />
     </Provider>
   );
 

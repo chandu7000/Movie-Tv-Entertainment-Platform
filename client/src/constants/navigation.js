@@ -1,4 +1,4 @@
-import { FaCompass, FaHome } from 'react-icons/fa';
+import { FaCompass, FaHome, FaCog } from 'react-icons/fa';
 import { PiTelevisionFill } from 'react-icons/pi';
 import { BiSolidCameraMovie } from 'react-icons/bi';
 import { IoIosSearch } from 'react-icons/io';
@@ -50,8 +50,8 @@ export const mobileNavigation = [
     icon: <PiTelevisionFill />,
   },
   {
-    label: 'Search',
-    href: '/search',
-    icon: <IoIosSearch />,
+    label: 'Settings',
+    href: '/settings',
+    icon: <FaCog />,
   },
 ];

@@ -7,24 +7,6 @@ import router from './routes/index';
 import { Provider } from 'react-redux';
 import store from './app/store';
 
-const preventZoom = (event) => {
-  if (
-    (event.ctrlKey || event.metaKey) &&
-    ['+', '-', '=', '0'].includes(event.key)
-  ) {
-    event.preventDefault();
-  }
-};
-
-const preventWheelZoom = (event) => {
-  if (event.ctrlKey || event.metaKey) {
-    event.preventDefault();
-  }
-};
-
-document.addEventListener('keydown', preventZoom);
-document.addEventListener('wheel', preventWheelZoom, { passive: false });
-
 const root = ReactDOM.createRoot(document.getElementById('root'));
 
 root.render(
@@ -32,5 +14,13 @@ root.render(
     <RouterProvider router={router} />
   </Provider>
 );
+
+const splash = document.getElementById('cineverse-splash');
+
+window.setTimeout(() => {
+  if (!splash) return;
+  splash.classList.add('cineverse-splash-hide');
+  window.setTimeout(() => splash.remove(), 450);
+}, 1350);
 
 reportWebVitals();

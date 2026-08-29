@@ -48,15 +48,15 @@ function App() {
 
         if (!active) return;
 
-        const trendingResults = trendingResponse?.data?.results || [];
-        const secureBaseUrl =
-          configurationResponse?.data?.images?.secure_base_url;
+        dispatch(
+          setBannerData(trendingResponse.data.results || [])
+        );
 
-        dispatch(setBannerData(trendingResults));
-
-        if (secureBaseUrl) {
-          dispatch(setImageURL(`${secureBaseUrl}original`));
-        }
+        dispatch(
+          setImageURL(
+            `${configurationResponse.data.images.secure_base_url}original`
+          )
+        );
       } catch (error) {
         console.error(
           'Unable to initialize MovieApp data:',
