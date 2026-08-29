@@ -1,13 +1,15 @@
-import React from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import { useSelector } from 'react-redux';
 import BannerHome from '../components/BannerHome';
 import HorizontalScrollCard from '../../../components/media/HorizontalScrollCard';
 import useFetch from '../../../hooks/useFetch';
 import PersonalizedRecommendations from '../../recommendations/components/PersonalizedRecommendations';
 import GuestHomeLock from '../../auth/GuestHomeLock';
+import { getRecentlyViewed, removeRecentlyViewed } from '../../history/recentlyViewed';
 
-const HomeSections = ({ trendingData, popularMovies, popularTv, topRated, upcoming, nowPlaying, onTheAir }) => (
+const HomeSections = ({ recentlyViewed, onRemoveRecentlyViewed, trendingData, popularMovies, popularTv, topRated, upcoming, nowPlaying, onTheAir }) => (
   <>
+    {recentlyViewed.length ? <HorizontalScrollCard data={recentlyViewed} heading='Recently Viewed' onRemoveItem={onRemoveRecentlyViewed} /> : null}
     <HorizontalScrollCard data={trendingData} heading='Trending Today' trending />
     <HorizontalScrollCard data={popularMovies.data} loading={popularMovies.loading} error={popularMovies.error} onRetry={popularMovies.retry} heading='Popular Movies' media_type='movie' />
     <HorizontalScrollCard data={nowPlaying.data} loading={nowPlaying.loading} error={nowPlaying.error} onRetry={nowPlaying.retry} heading='Now Playing' media_type='movie' variant='landscape' />
@@ -22,6 +24,7 @@ const HomeSections = ({ trendingData, popularMovies, popularTv, topRated, upcomi
 const Home = () => {
   const user = useSelector((state) => state.auth.user);
   const trendingData = useSelector((state) => state.movieData.bannerData);
+  const [recentlyViewed, setRecentlyViewed] = useState([]);
   const popularMovies = useFetch('/movie/popular');
   const popularTv = useFetch('/tv/popular');
   const topRated = useFetch('/movie/top_rated');
@@ -29,7 +32,21 @@ const Home = () => {
   const nowPlaying = useFetch('/movie/now_playing');
   const onTheAir = useFetch('/tv/on_the_air');
 
-  const sections = <HomeSections {...{ trendingData, popularMovies, popularTv, topRated, upcoming, nowPlaying, onTheAir }} />;
+  const refreshRecentlyViewed = useCallback(() => {
+    setRecentlyViewed(getRecentlyViewed(user));
+  }, [user]);
+
+  const handleRemoveRecentlyViewed = useCallback((item) => {
+    removeRecentlyViewed(user, item.id, item.media_type);
+  }, [user]);
+
+  useEffect(() => {
+    refreshRecentlyViewed();
+    window.addEventListener('cineverse:recently-viewed-updated', refreshRecentlyViewed);
+    return () => window.removeEventListener('cineverse:recently-viewed-updated', refreshRecentlyViewed);
+  }, [refreshRecentlyViewed]);
+
+  const sections = <HomeSections {...{ recentlyViewed, onRemoveRecentlyViewed: handleRemoveRecentlyViewed, trendingData, popularMovies, popularTv, topRated, upcoming, nowPlaying, onTheAir }} />;
 
   return (
     <div>

@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { useLocation, useParams } from 'react-router-dom';
 import useFetch from '../../../hooks/useFetch';
 import useFetchDetails from '../../../hooks/useFetchDetails';
@@ -17,6 +17,7 @@ import SectionHeader from '../../../components/ui/SectionHeader';
 import SaveToggle from '../../library/components/SaveToggle';
 import RatingReviewPanel from '../../reviews/components/RatingReviewPanel';
 import { toMediaPayload } from '../../../utils/mediaPayload';
+import { addRecentlyViewed } from '../../history/recentlyViewed';
 
 const formatMoney = (value) => value ? `$${Number(value).toLocaleString()}` : 'N/A';
 
@@ -32,6 +33,7 @@ const DetailsPage = () => {
   const location = useLocation();
   const mediaType = location.pathname.startsWith('/tv/') ? 'tv' : 'movie';
   const imageURL = useSelector((state) => state.movieData.imageURL);
+  const user = useSelector((state) => state.auth.user);
   const { data, loading, error, retry } = useFetchDetails(`/${mediaType}/${params?.id}`);
   const { data: castData } = useFetchDetails(`/${mediaType}/${params?.id}/credits`);
   const { data: videosData } = useFetchDetails(`/${mediaType}/${params?.id}/videos`);
@@ -39,6 +41,10 @@ const DetailsPage = () => {
   const { data: similarData } = useFetch(`/${mediaType}/${params?.id}/similar`);
   const { data: recommendationData } = useFetch(`/${mediaType}/${params?.id}/recommendations`);
   const [playVideo, setPlayVideo] = useState(false);
+
+  useEffect(() => {
+    if (user && data?.id) addRecentlyViewed(user, data, mediaType);
+  }, [user, data, mediaType]);
 
   const certification = useMemo(() => {
     if (mediaType === 'movie') {

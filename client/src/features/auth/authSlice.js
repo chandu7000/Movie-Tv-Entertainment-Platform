@@ -4,17 +4,17 @@ import { getCurrentUser, loginAccount, logoutAccount, registerAccount } from './
 const TOKEN_KEY = 'cineverse_token';
 
 const saveSession = (payload) => {
-  if (payload?.token) localStorage.setItem(TOKEN_KEY, payload.token);
+  if (payload?.token) sessionStorage.setItem(TOKEN_KEY, payload.token);
   return payload?.user || null;
 };
 
 export const restoreSession = createAsyncThunk('auth/restoreSession', async (_, { rejectWithValue }) => {
-  if (!localStorage.getItem(TOKEN_KEY)) return null;
+  if (!sessionStorage.getItem(TOKEN_KEY)) return null;
   try {
     const response = await getCurrentUser();
     return response.data.data.user;
   } catch (error) {
-    localStorage.removeItem(TOKEN_KEY);
+    sessionStorage.removeItem(TOKEN_KEY);
     return rejectWithValue(error.response?.data?.message || 'Session expired.');
   }
 });
@@ -39,7 +39,7 @@ export const register = createAsyncThunk('auth/register', async (payload, { reje
 
 export const logout = createAsyncThunk('auth/logout', async () => {
   try { await logoutAccount(); } catch (_) { /* local logout still proceeds */ }
-  localStorage.removeItem(TOKEN_KEY);
+  sessionStorage.removeItem(TOKEN_KEY);
   return null;
 });
 
