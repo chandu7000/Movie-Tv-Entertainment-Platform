@@ -158,10 +158,14 @@ const BannerHome = () => {
               aria-hidden={!isCurrent}
             >
               {data.backdrop_path ? <img src={`${imageURL}${data.backdrop_path}`} alt={data?.title || data?.name || 'Featured title'} className='h-full w-full object-cover object-center' /> : null}
-              <div className='absolute inset-0 bg-gradient-to-r from-neutral-950 via-neutral-950/70 to-neutral-950/5' />
-              <div className='absolute inset-0 bg-gradient-to-t from-neutral-950 via-transparent to-black/30' />
-              <div className='absolute inset-0 flex items-end'>
-                <div className='mx-auto w-full max-w-[1600px] px-4 pb-16 sm:px-6 lg:px-10 lg:pb-24'>
+
+              <div className='pointer-events-none absolute inset-0 bg-black/25' />
+              <div className='pointer-events-none absolute inset-y-0 left-0 w-[42%] bg-gradient-to-r from-neutral-950/75 via-neutral-950/35 to-transparent' />
+              <div className='pointer-events-none absolute inset-y-0 right-0 w-[30%] bg-gradient-to-l from-neutral-950/55 via-neutral-950/20 to-transparent' />
+              <div className='pointer-events-none absolute inset-0 bg-gradient-to-t from-neutral-950 via-transparent to-black/20' />
+
+              <div className='absolute inset-0 z-[2] flex items-end'>
+                <div className='mx-auto w-full max-w-[1600px] px-4 pb-16 sm:px-6 md:px-14 lg:px-20 lg:pb-24 xl:px-24'>
                   <div className='max-w-3xl'>
                     <div className='mb-3 flex flex-wrap items-center gap-2'>
                       <Badge>{data.media_type === 'tv' ? 'TV Series' : 'Movie'}</Badge>
@@ -185,14 +189,14 @@ const BannerHome = () => {
       </div>
 
       {slideCount > 1 ? (
-        <div className='pointer-events-none absolute inset-y-0 left-0 right-0 hidden items-center justify-between px-4 sm:flex lg:px-8'>
-          <IconButton onClick={handlePrevious} variant='glass' className='pointer-events-auto' aria-label='Previous featured title'><FaAngleLeft /></IconButton>
-          <IconButton onClick={handleNext} variant='glass' className='pointer-events-auto' aria-label='Next featured title'><FaAngleRight /></IconButton>
+        <div className='pointer-events-none absolute inset-y-0 left-0 right-0 z-10 hidden items-center justify-between sm:flex'>
+          <IconButton onClick={handlePrevious} variant='glass' className='pointer-events-auto ml-3 lg:ml-4' aria-label='Previous featured title'><FaAngleLeft /></IconButton>
+          <IconButton onClick={handleNext} variant='glass' className='pointer-events-auto mr-3 lg:mr-4' aria-label='Next featured title'><FaAngleRight /></IconButton>
         </div>
       ) : null}
 
       {slideCount > 1 ? (
-        <div className='absolute bottom-5 left-1/2 z-10 flex max-w-[92vw] -translate-x-1/2 items-center gap-3 rounded-full border border-white/10 bg-black/35 px-3 py-2 backdrop-blur-md'>
+        <div className='absolute bottom-5 left-1/2 z-20 flex max-w-[92vw] -translate-x-1/2 items-center gap-3 rounded-full border border-white/10 bg-black/35 px-3 py-2 backdrop-blur-md'>
           <span className='min-w-[44px] text-center text-[11px] font-semibold tabular-nums text-white/75' aria-live='polite'>
             {String(currentImage + 1).padStart(2, '0')} / {String(slideCount).padStart(2, '0')}
           </span>

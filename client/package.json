@@ -21,10 +21,10 @@
     "web-vitals": "^2.1.4"
   },
   "scripts": {
-    "dev": "react-scripts start",
-    "start": "react-scripts start",
-    "build": "react-scripts build",
-    "test": "react-scripts test",
+    "dev": "node \"./node_modules/react-scripts/bin/react-scripts.js\" start",
+    "start": "node \"./node_modules/react-scripts/bin/react-scripts.js\" start",
+    "build": "node \"./node_modules/react-scripts/bin/react-scripts.js\" build",
+    "test": "node \"./node_modules/react-scripts/bin/react-scripts.js\" test",
     "eject": "react-scripts eject",
     "server:start": "npm --prefix server start",
     "server:dev": "npm --prefix server run dev",
