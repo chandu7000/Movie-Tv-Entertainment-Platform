@@ -1,7 +1,7 @@
 {
   "files": {
     "main.css": "/static/css/main.895a4b79.css",
-    "main.js": "/static/js/main.5e44cade.js",
+    "main.js": "/static/js/main.4da75e13.js",
     "static/js/453.1f6fefc9.chunk.js": "/static/js/453.1f6fefc9.chunk.js",
     "static/js/236.47146d58.chunk.js": "/static/js/236.47146d58.chunk.js",
     "static/js/115.521f6e25.chunk.js": "/static/js/115.521f6e25.chunk.js",
@@ -18,7 +18,7 @@
     "static/media/cineverse-logo.png": "/static/media/cineverse-logo.475a26b1808025f8009a.png",
     "index.html": "/index.html",
     "main.895a4b79.css.map": "/static/css/main.895a4b79.css.map",
-    "main.5e44cade.js.map": "/static/js/main.5e44cade.js.map",
+    "main.4da75e13.js.map": "/static/js/main.4da75e13.js.map",
     "453.1f6fefc9.chunk.js.map": "/static/js/453.1f6fefc9.chunk.js.map",
     "236.47146d58.chunk.js.map": "/static/js/236.47146d58.chunk.js.map",
     "115.521f6e25.chunk.js.map": "/static/js/115.521f6e25.chunk.js.map",
@@ -35,6 +35,6 @@
   },
   "entrypoints": [
     "static/css/main.895a4b79.css",
-    "static/js/main.5e44cade.js"
+    "static/js/main.4da75e13.js"
   ]
 }
