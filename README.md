@@ -7,7 +7,7 @@ The application combines a cinematic React interface with a secure Node.js and E
 ## Live Demo
 
 - **Frontend:** https://cineverse-movie-tv.netlify.app
-- **Backend API:** https://movie-tv-entertainment-platform.onrender.com
+- **Backend API:** https://movie-tv-entertainment-platform.onrender.com/api
 - **API Health Check:** https://movie-tv-entertainment-platform.onrender.com/api/health
 
 > The backend is hosted on Render's free service tier. After a period of inactivity, the first request may take additional time while the service starts.
