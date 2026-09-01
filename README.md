@@ -1,734 +1,188 @@
 # CineVerse — Movie & TV Entertainment Platform
 
-CineVerse is a modern Movie & TV entertainment platform designed for discovering, exploring, and personalizing entertainment content.
-
-The application combines a cinematic React interface with a secure Node.js and Express backend, MongoDB persistence, TMDB integration, authentication, personalized recommendations, watchlists, favorites, ratings, reviews, trailers, and responsive user experiences.
-
-## Live Demo
-
-- **Frontend:** https://cineverse-movie-tv.netlify.app
-- **Backend API:** https://movie-tv-entertainment-platform.onrender.com
-- **API Health Check:** https://movie-tv-entertainment-platform.onrender.com/api/health
-
-> The backend is hosted on Render's free service tier. After a period of inactivity, the first request may take additional time while the service starts.
-
----
-
-## Features
-
-### Entertainment Discovery
-
-- Cinematic Home experience with an infinite hero slider
-- Smooth hero transitions with slide indicators
-- Trending, Popular, Now Playing, Top Rated and Upcoming movies
-- Popular, Airing Today, On The Air and Top Rated TV shows
-- Movie and TV discovery with filtering and sorting
-- Infinite scrolling
-- Multi-search across Movies, TV Shows and People
-- Debounced search
-- Recent and trending searches
-
-### Movie & TV Details
-
-- Movie and TV information
-- Ratings and release information
-- Genres and runtime
-- Cast and creators
-- Production information
-- Trailers, teasers and videos
-- Similar titles
-- Related recommendations
-- Automatic scroll-to-top when navigating to a new title
-
-### Authentication
-
-- User registration
-- Secure login and logout
-- JWT authentication
-- Password hashing with bcrypt
-- Session restoration
-- Browser-tab isolated authenticated sessions
-- Protected application routes
-- Login and registration redirect to Home
-
-### Guest Access Experience
-
-CineVerse provides a controlled preview experience for visitors who are not authenticated.
-
-Guests can:
-
-- View the Home page
-- Experience the cinematic hero slider
-- Preview available entertainment content
-- See Movies, TV Shows, Discover and Search navigation options
-
-Content below the Home hero is presented as a restricted preview.
-
-When a guest attempts to access protected content or actions, CineVerse displays a reusable authentication prompt with:
-
-- Login
-- Create Account
-
-Protected guest actions include:
-
-- Movie and TV details
-- Trailers
-- Movies
-- TV Shows
-- Discover
-- Search
-- Watchlist
-- Favorites
-- Ratings
-- Reviews
-- Recommendations
-- Profile
-
-After authentication, the complete application experience is unlocked.
-
----
-
-## Personalization
-
-Authenticated users receive personalized entertainment functionality including:
-
-- Personal Watchlist
-- Favorites
-- Ratings
-- Reviews
-- Profile statistics
-- Recent activity
-- Recently Viewed
-- Personalized recommendations
-
-Recommendation signals are generated from saved titles, favorites and user ratings.
-
-New users receive popular-content recommendations until enough preference information becomes available.
-
----
-
-## Recently Viewed
-
-Authenticated users can maintain a recent viewing history while exploring movie and TV details.
-
-Features include:
-
-- Recently viewed movie and TV titles
-- Recent-first ordering
-- Limited recent history
-- User/session-aware history
-- Card action menu
-- Remove individual items
-- Immediate UI updates after removal
-
----
-
-## Watchlist & Favorites
-
-Users can maintain separate persistent collections for:
-
-- Watchlist
-- Favorites
-
-Features include:
-
-- Add content
-- Remove content
-- Check saved state
-- Movie and TV support
-- Filtering
-- Sorting
-- Direct navigation to title details
-
-All user library information is persisted in MongoDB.
-
----
-
-## Ratings & Reviews
-
-CineVerse supports user-generated title feedback.
-
-Users can:
-
-- Rate movies and TV shows
-- Update ratings
-- Remove ratings
-- Write reviews
-- Edit their own reviews
-- Delete their own reviews
-
-Review ownership is enforced by the backend.
-
----
-
-## Performance & Reliability
-
-CineVerse includes several optimizations for a smoother user experience:
-
-- Server-side TMDB response caching
-- In-flight duplicate request coalescing
-- Automatic retry for temporary TMDB request failures
-- Cached response fallback
-- Client request timeouts
-- AbortController request cancellation
-- React route-level lazy loading
-- Lazy-loaded poster imagery
-- Loading skeletons
-- Empty states
-- Error states
-- Manual retry fallback
-
-Temporary TMDB failures are automatically retried before an error is shown to the user.
-
----
-
-## Security
-
-The backend includes production-oriented security controls:
-
-- Helmet security headers
-- Express signature disabled
-- Explicit CORS allowlist
-- Global API rate limiting
-- Stricter authentication rate limiting
-- JWT verification and expiration
-- Token-version logout revocation
-- bcrypt password hashing
-- Password length validation
-- Request body size limits
-- MongoDB operator and dotted-key filtering
-- Prototype-pollution protection
-- Production-safe error responses
-- Standardized 404 responses
-- Duplicate database conflicts mapped to HTTP `409`
-- Invalid MongoDB IDs mapped to HTTP `400`
-- Authentication responses configured with `no-store` / `no-cache`
-- Environment validation
-- TMDB credentials kept exclusively on the backend
-
-Real `.env` files and credentials are excluded from version control.
-
----
-
-## Testing
-
-The project contains automated frontend and backend tests covering areas such as:
-
-- Application smoke testing
-- Async UI states
-- Media payload normalization
-- Discovery controls
-- Authentication security
-- Backend validation
-- Security headers
-- Request-size protection
-- Safe 404 handling
-- JWT signature verification
-- User feature validation
-- Recommendation weighting
-
-### Current Verified Test Status
-
-Frontend:
-
-```text
-Test Suites: 5 passed, 5 total
-Tests:       7 passed, 7 total
-```
-
-Backend:
-
-```text
-Test Suites: 5 passed, 5 total
-Tests:       16 passed, 16 total
-```
-
-The frontend production build also compiles successfully.
-
----
-
-## Technology Stack
-
-### Frontend
-
-- React.js
-- JavaScript
-- Redux Toolkit
-- React Router
-- Tailwind CSS
-- Axios
-
-### Backend
-
-- Node.js
-- Express.js
-- MongoDB
-- Mongoose
-- JWT
-- bcrypt
-
-### External API
-
-- TMDB API
-
-### Development & Testing
-
-- Git
-- GitHub
-- Jest
-- React Testing Library
-- Supertest
-
-### Production
-
-- Netlify
-- Render
-- MongoDB Atlas
-- TMDB API
-
----
+CineVerse is a public movie and TV discovery application built from the CineVerse codebase and redesigned around a privacy-friendly streaming experience. It does not require login or registration. TMDB is used for entertainment metadata, while playback sources are stored separately in a new CineVerse MongoDB database.
+
+> **Content policy:** CineVerse is designed for media you own, public-domain works, Creative Commons media, or streams you are otherwise authorized to distribute. The project does not include piracy-site scraping, OTT DRM bypassing, or unauthorized copyrighted streams.
+
+## Current Transformation Status — Phases 1–18
+
+1. **Rebrand:** CineVerse application identity changed to CineVerse across the active client/server application.
+2. **Public access:** Login, registration, protected routes and guest locks removed.
+3. **Old user system removal:** JWT/user/profile authentication backend removed.
+4. **Old personal features removal:** Database watchlists, favorites, ratings, reviews and personalized recommendation code removed.
+5. **Fresh database:** default database is `cineverse_db`; `StreamSource` is the new streaming-data model.
+6. **Discovery preserved:** Home, Movies, TV Shows, Discover, Search, Details, cast, trailers, similar and recommendation metadata remain public.
+7. **Streaming architecture:** stream records support movie/TV/demo media, season/episode mapping, MP4/HLS source type, quality, language and subtitles.
+8. **Watch routes:** `/watch/movie/:id`, `/watch/tv/:id/:season/:episode`, and `/watch/demo`.
+9. **Video player:** dedicated CineVerse HTML5 player with seeking, volume, fullscreen, playback speed, MP4 playback, source/quality switching, subtitles and HLS playback through hls.js when native HLS is unavailable.
+10. **TV episodes:** season links, configured episode list and previous/next episode navigation.
+11. **Subtitles/languages:** WebVTT track metadata and language/quality source metadata supported.
+12. **Local personalization:** recently viewed and continue-watching progress are stored only in browser `localStorage`.
+13. **Streaming backend:** public availability, source, TV episode and demo endpoints added.
+14. **Performance:** existing lazy routes, image lazy loading, TMDB caching/retry/coalescing and request timeout behavior preserved.
+15. **UI transformation:** CineVerse branding, public navigation, player demo and Watch Now states added.
+16. **Security/privacy:** no account tracking, no JWT, CORS allowlist, Helmet, API rate limiting, input sanitization and environment validation retained.
+17. **Testing:** app/public-shell, playback-progress, health, security and stream-route tests included.
+18. **Cleanup:** authentication/user-specific files and unused auth packages removed from active project configuration.
+
+Phases 19–20 (production preparation and deployment) are intentionally left for final local verification, environment setup, GitHub push and deployment.
+
+## Stack
+
+**Frontend:** React 19, Redux Toolkit, React Router, Tailwind CSS, Axios, React Testing Library.
+
+**Backend:** Node.js, Express 5, MongoDB/Mongoose, Axios, Helmet, CORS, express-rate-limit, Morgan, Jest/Supertest.
+
+**External metadata:** TMDB API.
 
 ## Project Structure
 
 ```text
 Movie & TV Entertainment Platform/
-│
 ├── client/
 │   ├── public/
-│   ├── src/
-│   ├── package.json
-│   ├── package-lock.json
-│   ├── tailwind.config.js
-│   └── .env.example
-│
+│   └── src/
+│       ├── api/
+│       ├── app/
+│       ├── components/
+│       ├── features/
+│       │   ├── details/
+│       │   ├── discovery/
+│       │   ├── history/
+│       │   ├── home/
+│       │   ├── search/
+│       │   └── watch/
+│       └── routes/
 ├── server/
 │   ├── src/
-│   ├── tests/
-│   ├── package.json
-│   ├── package-lock.json
-│   └── .env.example
-│
-├── .gitignore
-├── README.md
-└── image.png
+│   │   ├── controllers/
+│   │   ├── models/StreamSource.js
+│   │   ├── routes/
+│   │   ├── scripts/seedDemoStreams.js
+│   │   └── services/
+│   └── tests/
+└── README.md
 ```
 
----
+## Environment
 
-## Getting Started
+### Server
 
-### Prerequisites
+Copy `server/.env.example` to `server/.env`:
 
-Install:
-
-- Node.js
-- npm
-- MongoDB or MongoDB Atlas
-- Git
-
-A TMDB API Read Access Token is also required.
-
----
-
-## Frontend Setup
-
-Navigate to the client:
-
-```bash
-cd client
+```env
+PORT=5000
+NODE_ENV=development
+MONGODB_URI=mongodb://127.0.0.1:27017/cineverse_db
+TMDB_ACCESS_TOKEN=your_tmdb_read_access_token
+# Optional but recommended for titles whose correct trailer is missing from TMDB:
+YOUTUBE_API_KEY=your_youtube_data_api_v3_key
+CLIENT_URL=http://localhost:3000
 ```
 
-Install dependencies:
+For MongoDB Atlas, create/use a **new CineVerse database** and put its URI in `MONGODB_URI`. Do not reuse the old CineVerse database if you want a clean separation.
 
-```bash
-npm install
-```
+### Trailer resolution
 
-Create a `.env` file based on `.env.example`:
+CineVerse does not simply play the first TMDB video anymore. The backend now ranks **official Trailer** entries first, checks regional TMDB video results (including Telugu, Hindi, Tamil, Malayalam and Kannada), rejects clips/promos/featurettes for the main trailer button, and only falls back to a teaser when necessary.
+
+If TMDB has no usable trailer at all, setting `YOUTUBE_API_KEY` enables an automatic YouTube Data API search for the movie/series title + year + original language + “official trailer”. This key is optional: without it, CineVerse still uses the improved multi-language TMDB resolver, but a title that is completely missing a trailer in TMDB will correctly show **Trailer Unavailable** instead of playing an unrelated clip.
+
+### Client
+
+Copy `client/.env.example` to `client/.env`:
 
 ```env
 REACT_APP_API_BASE_URL=http://localhost:5000/api
 REACT_APP_USE_BACKEND_TMDB=true
 ```
 
-Start the frontend:
+## Install and Run
 
-```bash
-npm run dev
-```
-
-The application runs at:
-
-```text
-http://localhost:3000
-```
-
----
-
-## Backend Setup
-
-Navigate to the server:
+Backend:
 
 ```bash
 cd server
-```
-
-Install dependencies:
-
-```bash
 npm install
-```
-
-Create a `.env` file based on `.env.example`.
-
-Example configuration:
-
-```env
-PORT=5000
-NODE_ENV=development
-MONGODB_URI=your_mongodb_connection_string
-JWT_SECRET=your_secure_random_jwt_secret
-JWT_EXPIRES_IN=7d
-CLIENT_URL=http://localhost:3000
-TMDB_ACCESS_TOKEN=your_tmdb_read_access_token
-```
-
-Start the backend:
-
-```bash
+npm run seed:demo
+npm test
 npm run dev
 ```
 
-The API runs at:
+Frontend in another terminal:
 
-```text
-http://localhost:5000
+```bash
+cd client
+npm install
+npm test -- --watchAll=false
+npm start
 ```
 
-> Never commit real database credentials, JWT secrets, TMDB tokens or `.env` files.
+The demo seeder adds **Big Buck Bunny** as an openly licensed player demonstration, with MP4 and HLS playback plus a local WebVTT caption track. It does not map a fake stream to arbitrary TMDB movies.
 
----
+## Stream Data Model
 
-## Main API Areas
-
-The backend provides APIs for:
+A stream record contains:
 
 ```text
-/api/auth
-/api/tmdb
-/api/watchlist
-/api/favorites
-/api/ratings
-/api/reviews
-/api/profile
-/api/recommendations
+mediaType     movie | tv | demo
+tmdbId        TMDB identifier (0 for standalone demo)
+season        TV season or 0
+ episode       TV episode or 0
+sourceType    mp4 | hls
+url           authorized media URL
+quality       e.g. 720p / 1080p / Auto
+language      source language
+subtitles     WebVTT track metadata
+isActive      availability flag
+isDemo        demo flag
+licenseNote   source/licensing note
 ```
 
-TMDB requests are proxied through the CineVerse backend so the TMDB access token is never exposed to the browser.
+For a movie, configure `season=0` and `episode=0`. For TV, configure each episode separately.
 
-### Health Check
+## Public Streaming API
 
 ```text
 GET /api/health
+GET /api/tmdb/*
+GET /api/streams/demo
+GET /api/streams/:mediaType/:tmdbId/availability
+GET /api/streams/:mediaType/:tmdbId
+GET /api/streams/tv/:tmdbId/episodes?season=1
 ```
 
-Production health endpoint:
+Movie example:
 
 ```text
-https://movie-tv-entertainment-platform.onrender.com/api/health
+GET /api/streams/movie/123/availability
+GET /api/streams/movie/123
 ```
 
-The health endpoint verifies that the deployed CineVerse backend is available.
-
----
-
-## Testing Commands
-
-### Frontend Tests
-
-```bash
-cd client
-npm test -- --watchAll=false
-```
-
-### Frontend Production Build
-
-```bash
-cd client
-npm run build
-```
-
-### Backend Tests
-
-```bash
-cd server
-npm test
-```
-
----
-
-## Application Flow
+TV example:
 
 ```text
-Guest
-  ↓
-CineVerse Home
-  ↓
-Hero Experience + Content Preview
-  ↓
-Protected Action
-  ↓
-Login / Create Account
-  ↓
-Authentication
-  ↓
-Complete CineVerse Experience
-  ↓
-Movies / TV Shows / Discover / Search
-  ↓
-Movie & TV Details / Trailers
-  ↓
-Watchlist / Favorites
-  ↓
-Ratings / Reviews
-  ↓
-Recently Viewed
-  ↓
-Personalized Recommendations
-  ↓
-Profile / Settings
+GET /api/streams/tv/456/episodes?season=1
+GET /api/streams/tv/456?season=1&episode=2
 ```
 
----
+## Privacy Design
 
-## Responsive Experience
+CineVerse has no account requirement in this version. Recently viewed titles and playback positions are stored locally in the user's browser. They are not written to the server database.
 
-CineVerse is designed for:
+## HLS Note
 
-- Desktop
-- Laptop
-- Tablet
-- Mobile
+MP4 playback uses the standard HTML5 video element. HLS playback uses native browser HLS when available and automatically loads hls.js for browsers such as Chrome that need Media Source Extensions. The legal demo seeder configures both an MP4 source and a public HLS test source so source switching can be tested without paid infrastructure.
 
-Navigation and content layouts adapt to different screen sizes.
+## Remaining Phases
 
-### Desktop Navigation
+**Phase 19:** run final production builds, browser/responsive testing, accessibility/performance checks and final README polish.
 
-```text
-CineVerse
-Home | Movies | TV Shows | Discover | Search
-Hi, User | Watchlist | Favorites | Settings
-```
+**Phase 20:** create the new repository, configure MongoDB Atlas and environment variables, deploy backend/frontend, seed only authorized content, and verify the live application.
 
-### Mobile Navigation
+### Home discovery updates
+CineVerse's public home feed mixes worldwide and Indian discovery content and includes New Releases, Popular in India, Bollywood, Telugu, Tamil, Malayalam, Kannada, Dubbed & International Picks, Hollywood, worldwide trending, and TV sections. Recently Viewed is browser-local and automatically keeps only the latest 10 unique titles.
 
-```text
-Top:
-CineVerse Logo | Search | Profile
+## Local Me hub
 
-Bottom:
-Home | Movies | TV | Settings
-```
-
----
-
-## Production Architecture
-
-```text
-User Browser
-    ↓
-Netlify
-React CineVerse Frontend
-    ↓
-HTTPS API
-    ↓
-Render
-Node.js / Express Backend
-    │
-    ├── MongoDB Atlas
-    │
-    └── TMDB API
-```
-
-### Production Services
-
-**Frontend**
-
-```text
-https://cineverse-movie-tv.netlify.app
-```
-
-Hosted on Netlify.
-
-**Backend**
-
-```text
-https://movie-tv-entertainment-platform.onrender.com
-```
-
-Hosted on Render.
-
-**Database**
-
-MongoDB Atlas provides production database persistence.
-
-**Entertainment Data**
-
-TMDB provides movie, TV, cast, poster, backdrop and related entertainment metadata through the backend TMDB proxy.
-
----
-
-## Production Environment Variables
-
-### Backend — Render
-
-The backend environment variables are configured securely in Render:
-
-```text
-NODE_ENV=production
-MONGODB_URI=<secret>
-JWT_SECRET=<secret>
-JWT_EXPIRES_IN=7d
-CLIENT_URL=https://cineverse-movie-tv.netlify.app
-TMDB_ACCESS_TOKEN=<secret>
-```
-
-Render supplies the production `PORT` automatically, so a fixed production port does not need to be configured manually.
-
-### Frontend — Netlify
-
-The production frontend uses:
-
-```text
-REACT_APP_API_BASE_URL=https://movie-tv-entertainment-platform.onrender.com/api
-REACT_APP_USE_BACKEND_TMDB=true
-```
-
-The frontend does not require a TMDB token when backend TMDB proxy mode is enabled.
-
-Real production secrets must never be committed to the repository.
-
----
-
-## Deployment
-
-CineVerse is deployed using:
-
-- **Frontend:** Netlify
-- **Backend:** Render
-- **Database:** MongoDB Atlas
-- **Entertainment Data:** TMDB API
-
-### Frontend
-
-Production URL:
-
-```text
-https://cineverse-movie-tv.netlify.app
-```
-
-The React production build is deployed to Netlify.
-
-### Backend
-
-Production URL:
-
-```text
-https://movie-tv-entertainment-platform.onrender.com
-```
-
-Health endpoint:
-
-```text
-https://movie-tv-entertainment-platform.onrender.com/api/health
-```
-
-The backend is deployed as a Node.js web service on Render and connects securely to MongoDB Atlas and TMDB.
-
-### Production Integration
-
-The deployed architecture follows this request flow:
-
-```text
-Browser
-   ↓
-Netlify React Frontend
-   ↓
-Render Express API
-   ├── MongoDB Atlas
-   └── TMDB API
-```
-
-The frontend communicates with the backend through HTTPS using the production API base URL.
-
----
-
-## Production Verification
-
-The deployed CineVerse application has been verified for:
-
-- Frontend availability
-- Backend availability
-- API health endpoint
-- MongoDB Atlas connectivity
-- TMDB-backed movie and TV data
-- Frontend-to-backend communication
-- Registration and authentication
-- Search
-- Movie and TV details
-- Watchlist and Favorites
-- Responsive application behavior
-
----
-
-## Screenshots
-
-Production screenshots can be added to showcase important CineVerse experiences such as:
-
-- Home
-- Movie discovery
-- TV discovery
-- Search
-- Movie/TV details
-- Watchlist
-- Favorites
-- Profile
-- Mobile responsive experience
-
-Screenshots should never expose authentication tokens, credentials, environment variables or private browser information.
-
----
-
-## Future Improvements
-
-Potential future enhancements include:
-
-- Enhanced recommendation intelligence
-- Additional profile customization
-- Social entertainment features
-- Expanded accessibility testing
-- Additional end-to-end testing
-
----
-
-## Disclaimer
-
-CineVerse is a portfolio and educational project.
-
-Movie, TV, cast, poster, backdrop and related entertainment metadata are provided through TMDB.
-
-CineVerse does not host or distribute copyrighted movies or television episodes.
-
----
-
-## Author
-
-**Chandra Sekhar Nadiminti**
-
-MERN Full Stack Developer
-
----
-
-## License
-
-This project is intended for portfolio and educational use.
+On small screens, the fourth bottom-navigation slot is now **Me**. It is a local-only profile area with no account, name, email, or personal details. It includes Continue Watching, Favorites, the latest 10 viewed titles, autoplay-next-episode preference, and local privacy/storage controls. Favorites and preferences are stored only in the current browser.

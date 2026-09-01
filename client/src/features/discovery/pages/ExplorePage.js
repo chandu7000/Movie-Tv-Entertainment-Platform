@@ -135,7 +135,7 @@ const ExplorePage = () => {
     : `${categoryLabel} ${isMovie ? 'Movies' : 'TV Shows'}`;
 
   return (
-    <section className='px-4 py-10 sm:px-6 lg:px-10'>
+    <section className='px-3 py-6 sm:px-6 sm:py-10 lg:px-10'>
       <div className='mx-auto w-full max-w-[1600px]'>
         <SectionHeader
           title={heading}
@@ -172,12 +172,12 @@ const ExplorePage = () => {
           <EmptyState title='No titles found' message='Try another category or reset the current filters.' />
         ) : null}
 
-        <div className='grid grid-cols-[repeat(auto-fit,230px)] justify-center gap-5 lg:justify-start'>
+        <div className='grid grid-cols-3 gap-1.5 sm:grid-cols-[repeat(auto-fit,230px)] sm:justify-center sm:gap-5 lg:justify-start'>
           {data.map((item) => (
             <Card data={item} key={`${item.id}-${mediaType}-explore-section`} media_type={mediaType} />
           ))}
           {loading && data.length === 0
-            ? Array.from({ length: 10 }).map((_, index) => <Skeleton key={`explore-skeleton-${index}`} className='h-80 w-[230px]' />)
+            ? Array.from({ length: 10 }).map((_, index) => <Skeleton key={`explore-skeleton-${index}`} className='aspect-[2/3] w-full sm:h-80 sm:w-[230px]' />)
             : null}
         </div>
 

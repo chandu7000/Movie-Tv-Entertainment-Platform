@@ -20,3 +20,6 @@ export const discoverMedia = (mediaType, page = 1, params = {}) =>
 
 export const searchMulti = (query, page = 1) =>
   tmdbClient.get('/search/multi', { params: { query, page, include_adult: false } });
+
+export const searchMovies = (query, page = 1) =>
+  tmdbClient.get('/search/movie', { params: { query, page, include_adult: false } });

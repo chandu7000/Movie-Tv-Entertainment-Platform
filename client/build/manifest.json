@@ -1,10 +1,10 @@
 {
-  "short_name": "CineVerse",
-  "name": "CineVerse | Movies & TV",
-  "description": "Discover movies and TV shows, watch trailers, build watchlists, save favorites, rate titles, and get personalized recommendations with CineVerse.",
+  "short_name": "Moventra",
+  "name": "Moventra \u2014 Movie Streaming Platform",
+  "description": "Public movie and TV discovery with a privacy-friendly player for authorized and public-domain streams.",
   "icons": [
     {
-      "src": "cineverse-icon-64.png",
+      "src": "moventra-icon-64.png",
       "sizes": "64x64",
       "type": "image/png",
       "purpose": "any"

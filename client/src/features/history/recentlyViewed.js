@@ -1,55 +1,57 @@
-const MAX_RECENTLY_VIEWED = 12;
-const RECENTLY_VIEWED_PREFIX = 'cineverse_recently_viewed';
+const RECENT_KEY = 'cineverse_recently_viewed';
+const UPDATE_EVENT = 'cineverse:recently-viewed-updated';
+export const MAX_RECENTLY_VIEWED = 10;
 
-const getIdentity = (user) => user?._id || user?.id || user?.email || 'user';
-const getStorageKey = (user) => `${RECENTLY_VIEWED_PREFIX}:${String(getIdentity(user)).toLowerCase()}`;
-
-const normalizeMedia = (data, mediaType) => ({
-  id: Number(data?.id),
-  media_type: mediaType,
-  title: data?.title || undefined,
-  name: data?.name || undefined,
-  poster_path: data?.poster_path || '',
-  backdrop_path: data?.backdrop_path || '',
-  release_date: data?.release_date || '',
-  first_air_date: data?.first_air_date || '',
-  vote_average: Number(data?.vote_average || 0),
-});
-
-export const getRecentlyViewed = (user) => {
-  if (!user) return [];
-
+const readItems = () => {
   try {
-    const items = JSON.parse(sessionStorage.getItem(getStorageKey(user)) || '[]');
-    return Array.isArray(items) ? items : [];
+    const parsed = JSON.parse(localStorage.getItem(RECENT_KEY) || '[]');
+    return Array.isArray(parsed) ? parsed.slice(0, MAX_RECENTLY_VIEWED) : [];
   } catch {
     return [];
   }
 };
 
-export const addRecentlyViewed = (user, data, mediaType) => {
-  if (!user || !data?.id || !mediaType) return [];
+const writeItems = (items) => {
+  const trimmed = items.slice(0, MAX_RECENTLY_VIEWED);
+  localStorage.setItem(RECENT_KEY, JSON.stringify(trimmed));
+  window.dispatchEvent(new Event(UPDATE_EVENT));
+};
 
-  const current = getRecentlyViewed(user);
-  const item = normalizeMedia(data, mediaType);
+export const addRecentlyViewed = (_user, media, mediaType) => {
+  if (!media?.id) return;
+
+  const item = {
+    id: media.id,
+    media_type: mediaType,
+    title: media.title,
+    name: media.name,
+    poster_path: media.poster_path,
+    backdrop_path: media.backdrop_path,
+    vote_average: media.vote_average,
+    release_date: media.release_date,
+    first_air_date: media.first_air_date,
+    viewedAt: Date.now(),
+  };
+
   const next = [
     item,
-    ...current.filter((entry) => !(Number(entry.id) === item.id && entry.media_type === mediaType)),
-  ].slice(0, MAX_RECENTLY_VIEWED);
+    ...readItems().filter(
+      (entry) => !(String(entry.id) === String(item.id) && entry.media_type === item.media_type)
+    ),
+  ];
 
-  sessionStorage.setItem(getStorageKey(user), JSON.stringify(next));
-  window.dispatchEvent(new Event('cineverse:recently-viewed-updated'));
-  return next;
+  writeItems(next);
 };
 
-export const removeRecentlyViewed = (user, id, mediaType) => {
-  if (!user || !id) return [];
+export const getRecentlyViewed = () => readItems();
 
-  const next = getRecentlyViewed(user).filter(
-    (entry) => !(Number(entry.id) === Number(id) && (!mediaType || entry.media_type === mediaType))
+export const removeRecentlyViewed = (_user, id, mediaType) =>
+  writeItems(
+    readItems().filter(
+      (item) => !(String(item.id) === String(id) && item.media_type === mediaType)
+    )
   );
 
-  sessionStorage.setItem(getStorageKey(user), JSON.stringify(next));
-  window.dispatchEvent(new Event('cineverse:recently-viewed-updated'));
-  return next;
-};
+export const RECENTLY_VIEWED_EVENT = UPDATE_EVENT;
+
+export const clearRecentlyViewed = () => writeItems([]);

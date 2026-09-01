@@ -1,7 +1,7 @@
 {
   "short_name": "CineVerse",
   "name": "CineVerse | Movies & TV",
-  "description": "Discover movies and TV shows, watch trailers, build watchlists, save favorites, rate titles, and get personalized recommendations with CineVerse.",
+  "description": "Discover movies and TV shows, watch trailers, and play authorized or public-domain streams with CineVerse.",
   "icons": [
     {
       "src": "cineverse-icon-64.png",

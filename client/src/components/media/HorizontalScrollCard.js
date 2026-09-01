@@ -60,14 +60,14 @@ const HorizontalScrollCard = ({ data = [], heading, trending, media_type, varian
   };
 
   return (
-    <section className='container mx-auto my-10 px-4 lg:px-10'>
+    <section className='container mx-auto my-6 px-3 sm:my-10 sm:px-4 lg:px-10'>
       <SectionHeader title={heading} />
       {loading ? <div className='grid grid-flow-col gap-4 overflow-hidden'>{Array.from({ length: isLandscape ? 4 : 6 }).map((_, i) => <Skeleton key={i} className={isLandscape ? 'h-52 w-[360px]' : 'h-80 w-[230px]'} />)}</div> : null}
       {!loading && error ? <ErrorState message={`Unable to load ${heading.toLowerCase()}.`} onRetry={onRetry} /> : null}
       {!loading && !error && !data.length ? <EmptyState title={`No ${heading.toLowerCase()} available`} message='There is no content to show in this section right now.' /> : null}
       {!loading && !error && data.length ? (
         <div className='relative'>
-          <div ref={containerRef} className={`scrollBar-none relative z-10 grid grid-flow-col gap-4 overflow-x-auto scroll-smooth ${isLandscape ? 'grid-cols-[repeat(auto-fit,300px)] sm:grid-cols-[repeat(auto-fit,360px)]' : 'grid-cols-[repeat(auto-fit,230px)]'}`}>
+          <div ref={containerRef} className={`scrollBar-none relative z-10 grid grid-flow-col gap-1.5 overflow-x-auto scroll-smooth sm:gap-4 ${isLandscape ? 'grid-cols-[repeat(auto-fit,calc((100vw-3rem)/3))] sm:grid-cols-[repeat(auto-fit,360px)]' : 'grid-cols-[repeat(auto-fit,calc((100vw-3rem)/3))] sm:grid-cols-[repeat(auto-fit,230px)]'}`}>
             {data.map(renderCard)}
           </div>
           <div className='pointer-events-none absolute inset-0 hidden items-center justify-between lg:flex'>

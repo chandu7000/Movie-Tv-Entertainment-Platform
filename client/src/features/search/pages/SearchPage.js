@@ -1,82 +1,90 @@
 import React, { useEffect, useMemo, useState } from 'react';
-import { useSearchParams } from 'react-router-dom';
+import { Navigate, useSearchParams } from 'react-router-dom';
 import Card from '../../../components/media/Card';
-import { getTrendingToday, searchMulti } from '../../../api/tmdbApi';
 import EmptyState from '../../../components/ui/EmptyState';
 import ErrorState from '../../../components/ui/ErrorState';
 import SectionHeader from '../../../components/ui/SectionHeader';
 import Skeleton from '../../../components/ui/Skeleton';
-import PersonCard from '../../../components/media/PersonCard';
-import { useSelector } from 'react-redux';
+import { searchMulti } from '../../../api/tmdbApi';
 
-const SEARCH_HISTORY_KEY = 'cineverse_recent_searches';
+const normalizeText = (value = '') =>
+  value
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, ' ')
+    .trim();
 
-const filters = [
-  { label: 'All', value: 'all' },
-  { label: 'Movies', value: 'movie' },
-  { label: 'TV Shows', value: 'tv' },
-  { label: 'People', value: 'person' },
-];
+const compactText = (value = '') => normalizeText(value).replace(/\s+/g, '');
+
+const mediaTitleMatches = (item, query) => {
+  const normalizedQuery = normalizeText(query);
+  const compactQuery = compactText(query);
+
+  if (!normalizedQuery || !compactQuery) return false;
+
+  return [item?.title, item?.original_title, item?.name, item?.original_name]
+    .filter(Boolean)
+    .some((title) => {
+      const normalizedTitle = normalizeText(title);
+      const compactTitle = compactText(title);
+      return normalizedTitle.includes(normalizedQuery) || compactTitle.includes(compactQuery);
+    });
+};
+
+const getMediaRelevanceScore = (item, query) => {
+  const normalizedQuery = normalizeText(query);
+  const compactQuery = compactText(query);
+  let bestScore = 0;
+
+  [item?.title, item?.original_title, item?.name, item?.original_name]
+    .filter(Boolean)
+    .forEach((title) => {
+      const normalizedTitle = normalizeText(title);
+      const compactTitle = compactText(title);
+      let score = 0;
+
+      if (normalizedTitle === normalizedQuery) score = 1000;
+      else if (normalizedTitle.startsWith(`${normalizedQuery} `)) score = 900;
+      else if (normalizedTitle.startsWith(normalizedQuery)) score = 850;
+      else if (normalizedTitle.includes(` ${normalizedQuery} `)) score = 800;
+      else if (normalizedTitle.includes(normalizedQuery)) score = 760;
+      else if (compactTitle.startsWith(compactQuery)) score = 720;
+      else if (compactTitle.includes(compactQuery)) score = 680;
+
+      bestScore = Math.max(bestScore, score);
+    });
+
+  return bestScore;
+};
+
+const getMetadataQualityScore = (item) => {
+  let score = 0;
+  if (item?.poster_path) score += 30;
+  if (item?.backdrop_path) score += 15;
+  if (Number(item?.vote_average) > 0) score += 12;
+  if (Number(item?.vote_count) >= 10) score += 10;
+  if (Number(item?.vote_count) >= 100) score += 8;
+  if (item?.release_date || item?.first_air_date) score += 8;
+  if (item?.overview) score += 5;
+  score += Math.min(Number(item?.popularity || 0) / 20, 12);
+  return score;
+};
+
+const sortSearchResults = (a, b, query) =>
+  getMediaRelevanceScore(b, query) - getMediaRelevanceScore(a, query) ||
+  getMetadataQualityScore(b) - getMetadataQualityScore(a) ||
+  (b.popularity || 0) - (a.popularity || 0);
 
 const SearchPage = () => {
-  const [searchParams, setSearchParams] = useSearchParams();
-  const imageURL = useSelector((state) => state.movieData.imageURL);
+  const [searchParams] = useSearchParams();
+  const query = (searchParams.get('q') || '').trim();
 
-  const query = searchParams.get('q') || '';
-  const type = searchParams.get('type') || 'all';
-
-  const [input, setInput] = useState(query);
   const [data, setData] = useState([]);
   const [page, setPage] = useState(1);
   const [totalPage, setTotalPage] = useState(0);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
-  const [recentSearches, setRecentSearches] = useState([]);
-  const [trending, setTrending] = useState([]);
-
-  useEffect(() => {
-    setInput(query);
-  }, [query]);
-
-  useEffect(() => {
-    try {
-      setRecentSearches(
-        JSON.parse(localStorage.getItem(SEARCH_HISTORY_KEY) || '[]')
-      );
-    } catch {
-      setRecentSearches([]);
-    }
-
-    getTrendingToday()
-      .then((response) =>
-        setTrending((response.data.results || []).slice(0, 8))
-      )
-      .catch(() => setTrending([]));
-  }, []);
-
-  useEffect(() => {
-    if (input.trim() === query) return undefined;
-
-    const timer = window.setTimeout(() => {
-      const value = input.trim();
-
-      const next = new URLSearchParams(searchParams);
-
-      if (value.length >= 2) {
-        next.set('q', value);
-      } else if (!value) {
-        next.delete('q');
-      } else {
-        return;
-      }
-
-      next.delete('page');
-
-      setSearchParams(next, { replace: true });
-    }, 650);
-
-    return () => window.clearTimeout(timer);
-  }, [input, query, searchParams, setSearchParams]);
 
   useEffect(() => {
     setPage(1);
@@ -89,347 +97,106 @@ const SearchPage = () => {
     let active = true;
 
     const fetchData = async () => {
-      const cleanQuery = query.trim();
-
-      if (cleanQuery.length < 2) {
-        setLoading(false);
-        return;
-      }
+      if (query.length < 2) return;
 
       try {
         setLoading(true);
         setError(null);
-
-        const response = await searchMulti(cleanQuery, page);
-
+        const response = await searchMulti(query, page);
         if (!active) return;
 
-        const results = response.data.results || [];
+        const matchingTitles = (response.data.results || [])
+          .filter((item) => item?.media_type === 'movie' || item?.media_type === 'tv')
+          .filter((item) => mediaTitleMatches(item, query))
+          .sort((a, b) => sortSearchResults(a, b, query));
 
         setData((previous) => {
-          const next =
-            page === 1
-              ? results
-              : [...previous, ...results];
-
+          const next = page === 1 ? matchingTitles : [...previous, ...matchingTitles];
           return Array.from(
-            new Map(
-              next.map((item) => [
-                `${item.media_type}-${item.id}`,
-                item,
-              ])
-            ).values()
+            new Map(next.map((item) => [`${item.media_type}:${item.id}`, item])).values()
           );
         });
 
-        setTotalPage(
-          Math.min(response.data.total_pages || 0, 500)
-        );
-
-        if (page === 1) {
-          setRecentSearches((previous) => {
-            const nextRecent = [
-              cleanQuery,
-              ...previous.filter(
-                (item) =>
-                  item.toLowerCase() !== cleanQuery.toLowerCase()
-              ),
-            ].slice(0, 6);
-
-            localStorage.setItem(
-              SEARCH_HISTORY_KEY,
-              JSON.stringify(nextRecent)
-            );
-
-            return nextRecent;
-          });
-        }
+        setTotalPage(Math.min(response.data.total_pages || 0, 20));
       } catch (requestError) {
-        if (active) {
-          setError(requestError);
-        }
+        if (active) setError(requestError);
       } finally {
-        if (active) {
-          setLoading(false);
-        }
+        if (active) setLoading(false);
       }
     };
 
     fetchData();
-
     return () => {
       active = false;
     };
-  }, [query, page]);
+  }, [page, query]);
 
   useEffect(() => {
     const handleScroll = () => {
       const reachedBottom =
-        window.innerHeight + window.scrollY >=
-        document.documentElement.scrollHeight - 250;
+        window.innerHeight + window.scrollY >= document.documentElement.scrollHeight - 250;
 
-      if (
-        reachedBottom &&
-        query &&
-        !loading &&
-        page < totalPage
-      ) {
+      if (reachedBottom && query.length >= 2 && !loading && page < totalPage) {
         setPage((previous) => previous + 1);
       }
     };
 
-    window.addEventListener('scroll', handleScroll, {
-      passive: true,
-    });
-
-    return () =>
-      window.removeEventListener('scroll', handleScroll);
+    window.addEventListener('scroll', handleScroll, { passive: true });
+    return () => window.removeEventListener('scroll', handleScroll);
   }, [loading, page, query, totalPage]);
 
-  const filteredData = useMemo(
+  const titles = useMemo(
     () =>
-      data.filter(
-        (item) =>
-          type === 'all' || item.media_type === type
-      ),
-    [data, type]
+      [...data].sort((a, b) => sortSearchResults(a, b, query)),
+    [data, query]
   );
 
-  const updateType = (nextType) => {
-    const next = new URLSearchParams(searchParams);
-
-    if (nextType === 'all') {
-      next.delete('type');
-    } else {
-      next.set('type', nextType);
-    }
-
-    setSearchParams(next);
-  };
-
-  const chooseSearch = (value) => {
-    setInput(value);
-
-    const next = new URLSearchParams(searchParams);
-    next.set('q', value);
-    next.delete('page');
-
-    setSearchParams(next);
-  };
-
-  const clearRecent = () => {
-    setRecentSearches([]);
-    localStorage.removeItem(SEARCH_HISTORY_KEY);
-  };
+  if (query.length < 2) {
+    return <Navigate to='/' replace />;
+  }
 
   return (
-    <div className='py-10'>
-      <div className='mx-auto w-full max-w-[1600px] px-4 sm:px-6 lg:px-10'>
-
-        <div className='mx-auto mb-8 max-w-3xl'>
-          <label
-            className='sr-only'
-            htmlFor='cineverse-search'
-          >
-            Search movies, TV shows and people
-          </label>
-
-          <input
-            id='cineverse-search'
-            type='search'
-            placeholder='Search movies, TV shows and people...'
-            onChange={(event) => setInput(event.target.value)}
-            value={input}
-            autoFocus={!query}
-            className='w-full rounded-2xl border border-white/10 bg-neutral-900/90 px-5 py-4 text-base text-white outline-none backdrop-blur placeholder:text-neutral-500 focus:border-white/30'
-          />
-        </div>
-
+    <div className='py-6 sm:py-10'>
+      <div className='mx-auto w-full max-w-[1600px] px-3 sm:px-6 lg:px-10'>
         <SectionHeader
-          title={
-            query
-              ? `Search results for “${query}”`
-              : 'Search CineVerse'
-          }
-          description={
-            query
-              ? `${filteredData.length} loaded ${
-                  type === 'all'
-                    ? 'results'
-                    : filters
-                        .find((item) => item.value === type)
-                        ?.label.toLowerCase()
-                }`
-              : 'Find movies, TV shows and people from TMDB.'
-          }
+          title={`Titles matching “${query}”`}
+          description={`${titles.length} matching ${titles.length === 1 ? 'title' : 'titles'}`}
         />
-
-        {query ? (
-          <div className='mb-6 flex gap-2 overflow-x-auto pb-1'>
-            {filters.map((filter) => (
-              <button
-                type='button'
-                key={filter.value}
-                onClick={() => updateType(filter.value)}
-                className={`whitespace-nowrap rounded-full px-4 py-2 text-sm font-bold transition ${
-                  type === filter.value
-                    ? 'bg-white text-neutral-950'
-                    : 'border border-white/10 bg-white/[0.04] text-neutral-300 hover:bg-white/10 hover:text-white'
-                }`}
-              >
-                {filter.label}
-              </button>
-            ))}
-          </div>
-        ) : (
-          <div className='grid gap-7 lg:grid-cols-2'>
-
-            <section className='rounded-2xl border border-white/10 bg-white/[0.03] p-5'>
-              <div className='mb-4 flex items-center justify-between gap-3'>
-                <h2 className='text-lg font-black text-white'>
-                  Recent searches
-                </h2>
-
-                {recentSearches.length ? (
-                  <button
-                    type='button'
-                    onClick={clearRecent}
-                    className='text-xs font-bold text-neutral-500 hover:text-white'
-                  >
-                    Clear
-                  </button>
-                ) : null}
-              </div>
-
-              {recentSearches.length ? (
-                <div className='flex flex-wrap gap-2'>
-                  {recentSearches.map((item) => (
-                    <button
-                      key={item}
-                      type='button'
-                      onClick={() => chooseSearch(item)}
-                      className='rounded-full border border-white/10 px-3 py-2 text-sm text-neutral-300 hover:bg-white/10 hover:text-white'
-                    >
-                      {item}
-                    </button>
-                  ))}
-                </div>
-              ) : (
-                <p className='text-sm text-neutral-500'>
-                  Your searches will appear here.
-                </p>
-              )}
-            </section>
-
-            <section className='rounded-2xl border border-white/10 bg-white/[0.03] p-5'>
-              <h2 className='mb-4 text-lg font-black text-white'>
-                Trending searches
-              </h2>
-
-              <div className='flex flex-wrap gap-2'>
-                {trending.map((item) => {
-                  const label = item.title || item.name;
-
-                  return label ? (
-                    <button
-                      key={`${item.media_type}-${item.id}`}
-                      type='button'
-                      onClick={() => chooseSearch(label)}
-                      className='rounded-full border border-white/10 px-3 py-2 text-sm text-neutral-300 hover:bg-white/10 hover:text-white'
-                    >
-                      {label}
-                    </button>
-                  ) : null;
-                })}
-              </div>
-            </section>
-          </div>
-        )}
 
         {error && data.length === 0 ? (
           <ErrorState message='Unable to load search results right now.' />
         ) : null}
 
-        {query &&
-        !loading &&
-        !error &&
-        filteredData.length === 0 ? (
+        {!loading && !error && titles.length === 0 ? (
           <EmptyState
-            title='No results found'
-            message='Try another search or result type.'
+            title='No Titles Found'
+            message='Try a title name from a movie, TV series, show or anime.'
           />
         ) : null}
 
-        {type === 'person' ? (
-          <div className='grid grid-cols-[repeat(auto-fit,130px)] justify-center gap-6 lg:justify-start'>
-            {filteredData.map((person) => (
-              <PersonCard
-                key={`person-${person.id}`}
-                person={person}
-                imageURL={imageURL}
-              />
-            ))}
-          </div>
-        ) : (
-          <div className='grid grid-cols-[repeat(auto-fit,230px)] justify-center gap-5 lg:justify-start'>
-            {filteredData
-              .filter(
-                (item) => item.media_type !== 'person'
-              )
-              .map((searchData) => (
-                <Card
-                  data={searchData}
-                  key={`${searchData.media_type}-${searchData.id}-search-section`}
-                  media_type={searchData.media_type}
-                />
-              ))}
-          </div>
-        )}
-
-        {type === 'all' &&
-        filteredData.some(
-          (item) => item.media_type === 'person'
-        ) ? (
-          <section className='mt-10'>
-            <h2 className='mb-5 text-xl font-black text-white'>
-              People
-            </h2>
-
-            <div className='grid grid-cols-[repeat(auto-fit,130px)] justify-center gap-6 lg:justify-start'>
-              {filteredData
-                .filter(
-                  (item) => item.media_type === 'person'
-                )
-                .map((person) => (
-                  <PersonCard
-                    key={`all-person-${person.id}`}
-                    person={person}
-                    imageURL={imageURL}
-                  />
-                ))}
-            </div>
-          </section>
-        ) : null}
+        <div className='grid grid-cols-3 gap-1.5 sm:grid-cols-[repeat(auto-fit,230px)] sm:justify-center sm:gap-5 lg:justify-start'>
+          {titles.map((item) => (
+            <Card
+              data={item}
+              key={`${item.media_type}-${item.id}-search`}
+              media_type={item.media_type}
+            />
+          ))}
+        </div>
 
         {loading && data.length === 0 ? (
-          <div className='grid grid-cols-[repeat(auto-fit,230px)] justify-center gap-5 lg:justify-start'>
-            {Array.from({ length: 8 }).map(
-              (_, index) => (
-                <Skeleton
-                  key={`search-skeleton-${index}`}
-                  className='h-80 w-[230px]'
-                />
-              )
-            )}
+          <div className='grid grid-cols-3 gap-1.5 sm:grid-cols-[repeat(auto-fit,230px)] sm:justify-center sm:gap-5 lg:justify-start'>
+            {Array.from({ length: 8 }).map((_, index) => (
+              <Skeleton key={`search-skeleton-${index}`} className='aspect-[2/3] w-full sm:h-80 sm:w-[230px]' />
+            ))}
           </div>
         ) : null}
 
         {loading && data.length > 0 ? (
           <p className='py-8 text-center text-sm font-semibold text-neutral-500'>
-            Loading more results…
+            Loading more titles…
           </p>
         ) : null}
-
       </div>
     </div>
   );

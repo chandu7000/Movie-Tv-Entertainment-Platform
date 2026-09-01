@@ -17,7 +17,7 @@ const sanitizeRequest = (req, res, next) => {
 };
 
 const securityHeaders = (req, res, next) => {
-  res.setHeader('Cache-Control', req.path.startsWith('/api/auth') ? 'no-store' : 'no-cache');
+  res.setHeader('Cache-Control', 'no-cache');
   res.setHeader('Pragma', 'no-cache');
   next();
 };

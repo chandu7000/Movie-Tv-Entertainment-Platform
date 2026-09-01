@@ -8,13 +8,13 @@ const DiscoverPage = () => {
   const options = [
     {
       title: 'Discover Movies',
-      description: 'Browse popular, now playing, upcoming and top-rated movies with filters and sorting.',
+      description: 'Explore popular, now-playing, upcoming and top-rated movies with flexible filters.',
       href: '/movie',
       icon: <BiSolidCameraMovie />,
     },
     {
       title: 'Discover TV Shows',
-      description: 'Browse the current TV collection now. A richer TV-specific discovery experience arrives in the dedicated TV phase.',
+      description: 'Explore popular and currently airing TV series with dedicated discovery controls.',
       href: '/tv',
       icon: <PiTelevisionFill />,
     },
@@ -25,7 +25,7 @@ const DiscoverPage = () => {
       <div className='mx-auto w-full max-w-[1600px]'>
         <SectionHeader title='Discover' />
         <p className='mb-8 max-w-2xl text-sm leading-6 text-neutral-400 sm:text-base'>
-          Choose what you want to explore. CineVerse keeps movie and TV discovery focused while preserving the same cinematic design system.
+          Explore movies and TV series by popularity, release status, genre, language and more.
         </p>
 
         <div className='grid gap-5 md:grid-cols-2'>
@@ -41,7 +41,7 @@ const DiscoverPage = () => {
               <h2 className='text-2xl font-black text-white'>{option.title}</h2>
               <p className='mt-3 max-w-xl leading-6 text-neutral-400'>{option.description}</p>
               <span className='mt-6 inline-block text-sm font-bold text-white transition group-hover:translate-x-1'>
-                Explore now →
+                Explore →
               </span>
             </Link>
           ))}

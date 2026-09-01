@@ -1,57 +1,17 @@
-import { FaCompass, FaHome, FaCog } from 'react-icons/fa';
+import { FaCompass, FaHome, FaUser } from 'react-icons/fa';
 import { PiTelevisionFill } from 'react-icons/pi';
 import { BiSolidCameraMovie } from 'react-icons/bi';
-import { IoIosSearch } from 'react-icons/io';
 
 export const navigation = [
-  {
-    label: 'Home',
-    href: '/',
-    icon: <FaHome />,
-    end: true,
-  },
-  {
-    label: 'Movies',
-    href: '/movie',
-    icon: <BiSolidCameraMovie />,
-  },
-  {
-    label: 'TV Shows',
-    href: '/tv',
-    icon: <PiTelevisionFill />,
-  },
-  {
-    label: 'Discover',
-    href: '/discover',
-    icon: <FaCompass />,
-  },
-  {
-    label: 'Search',
-    href: '/search',
-    icon: <IoIosSearch />,
-  },
+  { label: 'Home', href: '/', icon: <FaHome />, end: true },
+  { label: 'Movies', href: '/movie', icon: <BiSolidCameraMovie /> },
+  { label: 'TV Shows', href: '/tv', icon: <PiTelevisionFill /> },
+  { label: 'Discover', href: '/discover', icon: <FaCompass /> },
 ];
 
 export const mobileNavigation = [
-  {
-    label: 'Home',
-    href: '/',
-    icon: <FaHome />,
-    end: true,
-  },
-  {
-    label: 'Movies',
-    href: '/movie',
-    icon: <BiSolidCameraMovie />,
-  },
-  {
-    label: 'TV',
-    href: '/tv',
-    icon: <PiTelevisionFill />,
-  },
-  {
-    label: 'Settings',
-    href: '/settings',
-    icon: <FaCog />,
-  },
+  { label: 'Home', href: '/', icon: <FaHome />, end: true },
+  { label: 'Movies', href: '/movie', icon: <BiSolidCameraMovie /> },
+  { label: 'TV', href: '/tv', icon: <PiTelevisionFill /> },
+  { label: 'Me', href: '/me', icon: <FaUser /> },
 ];

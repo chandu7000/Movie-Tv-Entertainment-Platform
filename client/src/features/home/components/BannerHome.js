@@ -1,5 +1,5 @@
 import React, { useEffect, useMemo, useState } from 'react';
-import { useDispatch, useSelector } from 'react-redux';
+import { useSelector } from 'react-redux';
 import { FaAngleLeft, FaAngleRight, FaPlay } from 'react-icons/fa6';
 import { useNavigate } from 'react-router-dom';
 import moment from 'moment';
@@ -8,20 +8,15 @@ import Badge from '../../../components/ui/Badge';
 import RatingBadge from '../../../components/ui/RatingBadge';
 import IconButton from '../../../components/ui/IconButton';
 import GenreChip from '../../../components/ui/GenreChip';
-import VideoPlay from '../../../components/media/VideoPlay';
 import useFetchDetails from '../../../hooks/useFetchDetails';
-import { openAuthGate } from '../../auth/authGateSlice';
 
 const BannerHome = () => {
-  const dispatch = useDispatch();
   const navigate = useNavigate();
-  const user = useSelector((state) => state.auth.user);
   const bannerData = useSelector((state) => state.movieData.bannerData);
   const imageURL = useSelector((state) => state.movieData.imageURL);
 
   const [currentSlide, setCurrentSlide] = useState(1);
   const [transitionEnabled, setTransitionEnabled] = useState(true);
-  const [playVideo, setPlayVideo] = useState(false);
 
   const slideCount = bannerData.length;
 
@@ -54,25 +49,11 @@ const BannerHome = () => {
     return `${hours ? `${hours}h ` : ''}${remainder}m`;
   }, [detailsData]);
 
-  const requireAuth = (action) => dispatch(openAuthGate({
-    title: `Sign in to ${action}`,
-    message: 'Login or create an account to watch trailers, open title details and unlock the full CineVerse experience.',
-  }));
-
-  const handleTrailer = () => {
-    if (!user) return requireAuth('watch trailers');
-    setPlayVideo(true);
-  };
-
-  const handleDetails = (data) => {
-    if (!user) return requireAuth('view title details');
-    navigate(`/${data.media_type}/${data.id}`);
-  };
+  const handleDetails = (data) => navigate(`/${data.media_type}/${data.id}`);
 
   const handleNext = () => {
     if (slideCount <= 1) return;
 
-    setPlayVideo(false);
     setTransitionEnabled(true);
     setCurrentSlide((previous) => Math.min(previous + 1, slideCount + 1));
   };
@@ -80,7 +61,6 @@ const BannerHome = () => {
   const handlePrevious = () => {
     if (slideCount <= 1) return;
 
-    setPlayVideo(false);
     setTransitionEnabled(true);
     setCurrentSlide((previous) => Math.max(previous - 1, 0));
   };
@@ -88,7 +68,6 @@ const BannerHome = () => {
   const goToSlide = (index) => {
     if (index === currentImage) return;
 
-    setPlayVideo(false);
     setTransitionEnabled(true);
     setCurrentSlide(slideCount === 1 ? 0 : index + 1);
   };
@@ -126,7 +105,7 @@ const BannerHome = () => {
   }, [transitionEnabled, slideCount]);
 
   useEffect(() => {
-    if (slideCount <= 1 || playVideo) return undefined;
+    if (slideCount <= 1) return undefined;
 
     const interval = setInterval(() => {
       setTransitionEnabled(true);
@@ -134,18 +113,18 @@ const BannerHome = () => {
     }, 7000);
 
     return () => clearInterval(interval);
-  }, [slideCount, playVideo]);
+  }, [slideCount]);
 
   if (!slideCount) {
     return (
-      <div className='h-[68vh] min-h-[500px] w-full animate-pulse bg-neutral-900' />
+      <div className='h-[62svh] min-h-[460px] max-h-[560px] w-full animate-pulse bg-neutral-900 sm:h-[68vh] sm:min-h-[500px] sm:max-h-none' />
     );
   }
 
   return (
     <section className='relative w-full overflow-hidden'>
       <div
-        className='flex h-[78vh] min-h-[540px] max-h-[860px]'
+        className='flex h-[62svh] min-h-[460px] max-h-[560px] sm:h-[78vh] sm:min-h-[540px] sm:max-h-[860px]'
         style={{
           transform: `translateX(-${currentSlide * 100}%)`,
           transition: transitionEnabled
@@ -175,7 +154,7 @@ const BannerHome = () => {
                 <img
                   src={`${imageURL}${data.backdrop_path}`}
                   alt={data?.title || data?.name || 'Featured title'}
-                  className='h-full w-full object-cover object-center'
+                  className='h-full w-full object-cover object-[center_28%] sm:object-center'
                 />
               ) : null}
 
@@ -185,9 +164,9 @@ const BannerHome = () => {
               <div className='pointer-events-none absolute inset-0 bg-gradient-to-t from-neutral-950 via-transparent to-black/20' />
 
               <div className='absolute inset-0 z-[2] flex items-end'>
-                <div className='mx-auto w-full max-w-[1600px] px-4 pb-20 sm:px-16 md:px-20 lg:px-24 lg:pb-24 xl:px-28'>
+                <div className='mx-auto w-full max-w-[1600px] px-4 pb-16 sm:px-16 sm:pb-20 md:px-20 lg:px-24 lg:pb-24 xl:px-28'>
                   <div className='max-w-3xl'>
-                    <div className='mb-3 flex flex-wrap items-center gap-2'>
+                    <div className='mb-2 flex flex-wrap items-center gap-1.5 sm:mb-3 sm:gap-2'>
                       <Badge>
                         {data.media_type === 'tv' ? 'TV Series' : 'Movie'}
                       </Badge>
@@ -207,13 +186,13 @@ const BannerHome = () => {
                       ) : null}
                     </div>
 
-                    <h1 className='max-w-3xl text-4xl font-black tracking-tight text-white drop-shadow-2xl sm:text-5xl lg:text-7xl'>
+                    <h1 className='max-w-3xl text-[2rem] font-black leading-[1.03] tracking-tight text-white drop-shadow-2xl sm:text-5xl lg:text-7xl'>
                       {data?.title || data?.name}
                     </h1>
 
                     {isCurrent && detailsData?.genres?.length ? (
-                      <div className='mt-4 flex flex-wrap gap-2'>
-                        {detailsData.genres.slice(0, 4).map((genre) => (
+                      <div className='mt-3 flex flex-wrap gap-1.5 sm:mt-4 sm:gap-2'>
+                        {detailsData.genres.slice(0, 3).map((genre) => (
                           <GenreChip key={genre.id}>
                             {genre.name}
                           </GenreChip>
@@ -221,23 +200,16 @@ const BannerHome = () => {
                       </div>
                     ) : null}
 
-                    <p className='mt-4 line-clamp-3 max-w-2xl text-sm leading-6 text-neutral-200 sm:text-base lg:text-lg lg:leading-7'>
+                    <p className='mt-3 line-clamp-2 max-w-2xl text-[13px] leading-5 text-neutral-200 sm:mt-4 sm:line-clamp-3 sm:text-base sm:leading-6 lg:text-lg lg:leading-7'>
                       {data.overview || 'Discover this featured title on CineVerse.'}
                     </p>
 
-                    <div className='mt-6 flex flex-wrap gap-3'>
-                      <Button onClick={handleTrailer} className='px-5 py-2.5'>
+                    <div className='mt-4 flex flex-wrap gap-3 sm:mt-6'>
+                      <Button onClick={() => handleDetails(data)} className='px-4 py-2 text-sm sm:px-5 sm:py-2.5 sm:text-base'>
                         <FaPlay className='text-sm' />
-                        Watch Trailer
-                      </Button>
-
-                      <Button
-                        variant='secondary'
-                        className='px-5 py-2.5'
-                        onClick={() => handleDetails(data)}
-                      >
                         View Details
                       </Button>
+
                     </div>
                   </div>
                 </div>
@@ -270,7 +242,7 @@ const BannerHome = () => {
       ) : null}
 
       {slideCount > 1 ? (
-        <div className='absolute bottom-5 left-1/2 z-20 flex max-w-[94vw] -translate-x-1/2 items-center gap-3 rounded-full border border-white/10 bg-black/40 px-3 py-2 backdrop-blur-md'>
+        <div className='absolute bottom-3 left-1/2 z-20 flex max-w-[94vw] -translate-x-1/2 items-center gap-2 rounded-full border border-white/10 bg-black/55 px-2.5 py-1.5 backdrop-blur-md sm:bottom-5 sm:gap-3 sm:px-3 sm:py-2'>
           <span
             className='min-w-[42px] text-center text-[11px] font-semibold tabular-nums text-white/75'
             aria-live='polite'
@@ -279,7 +251,7 @@ const BannerHome = () => {
           </span>
 
           <div
-            className='flex items-center gap-1'
+            className='flex items-center gap-[3px] sm:gap-1'
             role='tablist'
             aria-label='Featured titles'
           >
@@ -290,8 +262,8 @@ const BannerHome = () => {
                 onClick={() => goToSlide(index)}
                 className={`h-1.5 rounded-full transition-all duration-300 ${
                   currentImage === index
-                    ? 'w-5 bg-white'
-                    : 'w-2 bg-white/35 hover:bg-white/60'
+                    ? 'w-4 bg-white sm:w-5'
+                    : 'w-1.5 bg-white/35 hover:bg-white/60 sm:w-2'
                 }`}
                 aria-label={`Show featured title ${index + 1} of ${slideCount}`}
                 aria-selected={currentImage === index}
@@ -302,13 +274,6 @@ const BannerHome = () => {
         </div>
       ) : null}
 
-      {playVideo && currentData && user ? (
-        <VideoPlay
-          data={currentData}
-          close={() => setPlayVideo(false)}
-          media_type={mediaType}
-        />
-      ) : null}
     </section>
   );
 };
